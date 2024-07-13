@@ -1,0 +1,31 @@
+CNVD-2024-31539  高危 
+分析具体参考https://github.com/OoLs5/VulDiscovery/blob/main/poc.docx
+
+修复建议：
+1.
+在monstra-3.0.4/libraries/Gelato/FileSystem/File.php文件第332行添加如下代码：
+$content = htmlspecialchars($content, ENT_QUOTES);
+//即对特殊字符进行转义
+
+2.
+或者采用更严格的过滤，在同一位置加入：
+function check_str($string, $isurl = false)
+{
+$string =
+preg_replace('/[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]/','',$string);
+$string =
+str_replace(array("\0","%00","\r"),'',$string);
+empty($isurl) &&
+$string = preg_replace("/&(?!(#[0-9]+|[a-z]+);)/si",'&',$string);
+
+$string = str_replace(array("%3C",'<'),'<',$string);
+$string =
+str_replace(array("%3E",'>'),'>',$string);
+$string =
+str_replace(array('"',"'","\t",' '),array('“','‘',' ',' '),$string);
+return
+trim($string);
+}
+$content = check_str($content);
+
+
